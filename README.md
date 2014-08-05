@@ -1,5 +1,4 @@
-#Zemote
----
+# Zemote
 
 Zemote is a project to rethink the idea of a programmable remote control.
 Nowadays, entertainment systems have became more and more complicated. 
@@ -13,8 +12,7 @@ Also, they often lack the ability to work with devices produced by other compane
 Zemote attempts to solve the problem by allowing you to program your own remote control, with the use of other remote controls.
 It is designed to be simple to program and simple to use.
 
-#Programming a zemote control
----
+# Programming a zemote control
 
 1. To program a zemote controller, plug the zemote controller into your computer.
 
@@ -31,7 +29,6 @@ It is designed to be simple to program and simple to use.
 7. Finally, you're good to go.
 
 #Development
----
 
 Zemote firmware is developed based on Arduino and the IRremote library (special thanks to Ken Shirriff for developing it).
 
@@ -42,7 +39,6 @@ Contributions are welcome. Since the size of the project is still relatively sma
 If you have an Arduino, it's super simple for you to build a prototype and start playing around with the code. 
 
 #License
----
 
 Zemote
 (C) Copyright 2014 Cameron Lai
