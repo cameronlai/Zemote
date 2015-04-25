@@ -13,6 +13,38 @@
 
 import wx
 
+class serialToolBar(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+        self.parent = parent
+       
+        # Variables
+        self.baudRates = ["2400", "9600", "19200", "38400", "57600", "115200", "250000"]
+        self.serialPorts = ["COM1"]
+
+        self.__DoLayout()        
+
+    def __DoLayout(self):
+        self.refreshButton = wx.Button(self, name='Refresh', label='Refresh')
+        self.serialPortsComboBox = wx.ComboBox(self, -1, size=(150, -1), choices=self.serialPorts, style=wx.CB_READONLY)
+        self.serialPortsComboBox.SetValue(self.serialPorts[0]) # First serial port
+        self.baudRatesComboBox = wx.ComboBox(self, -1, size=(150, -1), choices=self.baudRates, style=wx.CB_READONLY)
+        self.baudRatesComboBox.SetValue(self.baudRates[1]) # 9600
+        self.connectButton = wx.Button(self, name='Connect', label='Connect')      
+
+        # Sizer
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.AddMany([
+            (self.refreshButton, 0),
+            (self.serialPortsComboBox, 0),
+            (self.baudRatesComboBox, 0),
+            (self.connectButton, 0),
+        ])
+        self.SetSizer(sizer)
+        
+        # Binding
+        #self.Bind(wx.EVT_COMBOBOX, self.OnSelec)
+
 class button_panel(wx.Panel):
     def __init__(self, parent, serial_queue):
         wx.Panel.__init__(self, parent)

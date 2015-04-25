@@ -27,21 +27,34 @@ class zemote_gui():
 
 class _zemote_gui_frame(wx.Frame):
     def __init__(self, parent, serial_queue):
-        wx.Frame.__init__(self, parent, title="Zemote", size=(300, 400))
+        wx.Frame.__init__(self, parent, title="Zemote", size=(600, 600))      
+
+        # Menu bar
+        self.menubar = wx.MenuBar()
+        fileMenu = wx.Menu()
+        fitem = fileMenu.Append(wx.ID_EXIT, 'Quit', 'Quit application')
+        self.menubar.Append(fileMenu, '&File')
+        self.SetMenuBar(self.menubar)
+
+        self.Bind(wx.EVT_MENU, self.OnQuit, fitem)
 
         # Panels
         self.button_panel = button_panel(self, serial_queue)
+        self.serialToolBar = serialToolBar(self)      
 
         # Layout
-        self.__DoLayout()
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.AddMany([
+            (self.serialToolBar, 0),
+            ((15, 15), 0),
+            (self.button_panel, 0),
+        ])
+        self.SetSizer(sizer)
+        self.SetMinSize((300, 300))
+
         self.statusBar = self.CreateStatusBar()
         self.statusBar.SetMinHeight(200)
 
-    def __DoLayout(self):        
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.AddMany([
-                ((15, 15), 0),
-                (self.button_panel, 0, wx.ALIGN_CENTER),
-                ])
-        self.SetSizer(sizer)
-        self.SetMinSize((300, 300))
+    def OnQuit(self, e):
+        self.Close()
+
