@@ -41,13 +41,18 @@ class _zemote_gui_frame(wx.Frame):
         # Panels
         self.button_panel = button_panel(self, serial_queue)
         self.serialToolBar = serialToolBar(self)      
+        self.serialTerminal = serialTerminal(self)
 
         # Layout
+        botSizer = wx.BoxSizer(wx.HORIZONTAL)
+        botSizer.AddMany([
+            (self.button_panel, 0),
+            (self.serialTerminal, 0),
+        ])
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.AddMany([
             (self.serialToolBar, 0),
-            ((15, 15), 0),
-            (self.button_panel, 0),
+            (botSizer, 0),
         ])
         self.SetSizer(sizer)
         self.SetMinSize((300, 300))

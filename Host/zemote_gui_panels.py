@@ -45,6 +45,34 @@ class serialToolBar(wx.Panel):
         # Binding
         #self.Bind(wx.EVT_COMBOBOX, self.OnSelec)
 
+class serialTerminal(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+        self.parent = parent
+       
+        self.__DoLayout()   
+
+    def __DoLayout(self):
+        self.terminalTextCtrl = wx.TextCtrl(self, -1, "Welcome!", size=(300, 100),
+                                            style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.inputTextCtrl = wx.TextCtrl(self, -1, "Welcome!", size=(200, -1))
+        self.sendButton = wx.Button(self, name='Send', label='Send')
+        # Sizer
+        botSizer = wx.BoxSizer(wx.HORIZONTAL)
+        botSizer.AddMany([
+            (self.inputTextCtrl, 0),
+            (self.sendButton, 0),
+        ])
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.AddMany([
+            (self.terminalTextCtrl, 0),
+            (botSizer, 0),
+        ])
+        self.SetSizer(sizer)
+
+        
+#        self.terminal.SetEditable(False)
+
 class button_panel(wx.Panel):
     def __init__(self, parent, serial_queue):
         wx.Panel.__init__(self, parent)

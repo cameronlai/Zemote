@@ -1,3 +1,4 @@
+#!/usr/bin/env python 
 # Zemote
 # (C) Copyright 2014 Cameron Lai
 #
