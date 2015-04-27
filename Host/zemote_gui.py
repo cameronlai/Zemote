@@ -16,18 +16,28 @@ import time
 import threading
 import Queue
 from zemote_gui_panels import *
+from ZemoteCore import *
 
 class zemote_gui():
-    def __init__(self, serial_queue):
+    def __init__(self):
         print 'Zemote Host Initialized'
         APP = wx.App(False)
-        FRAME = _zemote_gui_frame(None, serial_queue)
+        FRAME = _zemote_gui_frame(None)
         FRAME.Show()
         APP.MainLoop()
 
 class _zemote_gui_frame(wx.Frame):
-    def __init__(self, parent, serial_queue):
+    def __init__(self, parent):
         wx.Frame.__init__(self, parent, title="Zemote", size=(600, 600))      
+
+        # ZemoteCore
+        self.core = ZemoteCore()
+
+        # tmp 
+        snd_queue = Queue.Queue() # Queue to send from USB
+        rcv_queue = Queue.Queue() # Queue to receive from USB
+        # The flag connected is not protected. May need protection in the future
+        serial_queue = {'connected': False, 'snd': snd_queue, 'rcv': rcv_queue}
 
         # Menu bar
         self.menubar = wx.MenuBar()
@@ -37,6 +47,10 @@ class _zemote_gui_frame(wx.Frame):
         self.SetMenuBar(self.menubar)
 
         self.Bind(wx.EVT_MENU, self.OnQuit, fitem)
+
+        # Status bar
+        self.statusBar = self.CreateStatusBar()
+        self.statusBar.SetMinHeight(200)
 
         # Panels
         self.button_panel = button_panel(self, serial_queue)
@@ -56,9 +70,6 @@ class _zemote_gui_frame(wx.Frame):
         ])
         self.SetSizer(sizer)
         self.SetMinSize((300, 300))
-
-        self.statusBar = self.CreateStatusBar()
-        self.statusBar.SetMinHeight(200)
 
     def OnQuit(self, e):
         self.Close()

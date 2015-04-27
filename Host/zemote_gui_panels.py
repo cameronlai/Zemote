@@ -17,17 +17,18 @@ class serialToolBar(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.parent = parent
+        self.core = self.parent.core
+        self.statusBar = self.parent.statusBar
        
         # Variables
         self.baudRates = ["2400", "9600", "19200", "38400", "57600", "115200", "250000"]
-        self.serialPorts = ["COM1"]
-
+        self.serialPorts = []
         self.__DoLayout()        
 
     def __DoLayout(self):
         self.refreshButton = wx.Button(self, name='Refresh', label='Refresh')
-        self.serialPortsComboBox = wx.ComboBox(self, -1, size=(150, -1), choices=self.serialPorts, style=wx.CB_READONLY)
-        self.serialPortsComboBox.SetValue(self.serialPorts[0]) # First serial port
+        self.serialPortsComboBox = wx.ComboBox(self, -1, size=(150, -1), style=wx.CB_READONLY)
+        self.rescanSerialPorts()
         self.baudRatesComboBox = wx.ComboBox(self, -1, size=(150, -1), choices=self.baudRates, style=wx.CB_READONLY)
         self.baudRatesComboBox.SetValue(self.baudRates[1]) # 9600
         self.connectButton = wx.Button(self, name='Connect', label='Connect')      
@@ -44,18 +45,52 @@ class serialToolBar(wx.Panel):
         
         # Binding
         #self.Bind(wx.EVT_COMBOBOX, self.OnSelec)
+        self.Bind(wx.EVT_BUTTON, self.OnButton)
+    
+    def rescanSerialPorts(self):
+        self.serialPorts = self.core.scanSerialPort()
+        if len(self.serialPorts) > 0:
+            for i in range(len(self.serialPorts)):
+                self.serialPortsComboBox.Append(self.serialPorts[i])
+            self.serialPortsComboBox.SetValue(self.serialPorts[0]) # First serial port     
+        else:
+            self.serialPortsComboBox.Clear()
+            self.serialPortsComboBox.SetValue('')
 
+    def OnButton(self, evt):
+        btn = evt.GetEventObject()
+        btnName = btn.GetName()
+        btnLabel = btn.GetLabel()
+
+        if btnName == 'Connect':
+            print 'here'
+            if self.core.connected:
+                if self.core.disconnect():
+                    self.connectButton.SetLabel('Connect')
+                    self.statusBar.SetStatusText('Disconnected')
+            else:
+                port = self.serialPortsComboBox.GetValue()
+                baudRate = self.baudRatesComboBox.GetValue()
+                if self.core.connect(port, baudRate):
+                    self.connectButton.SetLabel('Disconnect')
+                    self.statusBar.SetStatusText('Connected')
+        elif btnName == 'Refresh':
+            self.rescanSerialPorts()
+            
+            
 class serialTerminal(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.parent = parent
+        self.core = self.parent.core
+        self.statusBar = self.parent.statusBar
        
         self.__DoLayout()   
 
     def __DoLayout(self):
-        self.terminalTextCtrl = wx.TextCtrl(self, -1, "Welcome!", size=(300, 100),
+        self.terminalTextCtrl = wx.TextCtrl(self, -1, "", size=(300, 100),
                                             style=wx.TE_MULTILINE|wx.TE_READONLY)
-        self.inputTextCtrl = wx.TextCtrl(self, -1, "Welcome!", size=(200, -1))
+        self.inputTextCtrl = wx.TextCtrl(self, -1, "", size=(200, -1))
         self.sendButton = wx.Button(self, name='Send', label='Send')
         # Sizer
         botSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -70,8 +105,24 @@ class serialTerminal(wx.Panel):
         ])
         self.SetSizer(sizer)
 
-        
-#        self.terminal.SetEditable(False)
+        # Binding 
+        self.Bind(wx.EVT_BUTTON, self.OnButton)
+
+        self.core.read_thread_buffer = self.terminalTextCtrl
+
+    def OnButton(self, evt):
+        btn = evt.GetEventObject()
+        btnName = btn.GetName()
+        btnLabel = btn.GetLabel()
+
+        if btnName == 'Send':
+            if self.core.connected:
+                cmd = self.core.send(self.inputTextCtrl.GetValue())
+                self.terminalTextCtrl.AppendText(cmd)
+                #rcvStr = self.core.receive()
+                #self.terminalTextCtrl.AppendText(rcvStr)                
+            else:
+                self.statusBar.SetStatusText('Serial port not connected')
 
 class button_panel(wx.Panel):
     def __init__(self, parent, serial_queue):
@@ -91,7 +142,7 @@ class button_panel(wx.Panel):
         self.__DoLayout()
 
         # Event Handlers
-        self.Bind(wx.EVT_BUTTON, self.OnButton)
+        self.Bind(wx.EVT_BUTTON, self.OnButton)        
         self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
 
     def __DoLayout(self):
@@ -141,6 +192,7 @@ class button_panel(wx.Panel):
 
     # Button event hanlder
     def OnButton(self, evt):
+        #self.parent.statusBar.SetStatusText("Hello")
         lastActionText = 'Last Action: '
         lastActionStatus = 'Status: '
 

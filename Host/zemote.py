@@ -26,8 +26,8 @@ vendorID = '2341:0043'
 
 if __name__ == '__main__':
     # Launch the serial thread
-    serial_thread = serial_tool.serial_tool(vendorID, serial_queue)
-    serial_thread.start()
+    #serial_thread = serial_tool.serial_tool(vendorID, serial_queue)
+    #serial_thread.start()   
 
     # Launch the gui thread
-    zemote_gui.zemote_gui(serial_queue)
+    zemote_gui.zemote_gui()
