@@ -14,6 +14,7 @@
 import serial
 import glob
 import threading
+import wx
 
 class ZemoteCore():
     def __init__(self):
@@ -25,6 +26,7 @@ class ZemoteCore():
         self.baudrate = None
 
         self.read_thread = None
+        self.read_thread_cb = None # Call back function for line read from serial port
         self.continue_read_thread = False
         self.read_thread_buffer = None
 
@@ -108,7 +110,9 @@ class ZemoteCore():
                 line = self.s.readline()
                 if line is not '':
                     print 'RCV:' + line
-                    self.read_thread_buffer.AppendText(line)
+                    wx.CallAfter(self.read_thread_cb, line)                    
             except:
-                continue
+                continue               
+                
         
+

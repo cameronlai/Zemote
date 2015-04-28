@@ -29,8 +29,8 @@ class zemote_gui():
 class _zemote_gui_frame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, title="Zemote", size=(600, 600))      
-
-        # ZemoteCore
+        
+        # Initiate ZemoteCore
         self.core = ZemoteCore()
 
         # tmp 
@@ -56,6 +56,10 @@ class _zemote_gui_frame(wx.Frame):
         self.button_panel = button_panel(self, serial_queue)
         self.serialToolBar = serialToolBar(self)      
         self.serialTerminal = serialTerminal(self)
+
+        # ZemoteCore - assign call backs
+        self.core.read_thread_cb = self.serialTerminal.updateTerminal
+
 
         # Layout
         botSizer = wx.BoxSizer(wx.HORIZONTAL)

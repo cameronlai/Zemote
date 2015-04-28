@@ -63,7 +63,6 @@ class serialToolBar(wx.Panel):
         btnLabel = btn.GetLabel()
 
         if btnName == 'Connect':
-            print 'here'
             if self.core.connected:
                 if self.core.disconnect():
                     self.connectButton.SetLabel('Connect')
@@ -110,6 +109,9 @@ class serialTerminal(wx.Panel):
 
         self.core.read_thread_buffer = self.terminalTextCtrl
 
+    def updateTerminal(self, line):
+        self.terminalTextCtrl.AppendText(line)
+
     def OnButton(self, evt):
         btn = evt.GetEventObject()
         btnName = btn.GetName()
@@ -119,8 +121,6 @@ class serialTerminal(wx.Panel):
             if self.core.connected:
                 cmd = self.core.send(self.inputTextCtrl.GetValue())
                 self.terminalTextCtrl.AppendText(cmd)
-                #rcvStr = self.core.receive()
-                #self.terminalTextCtrl.AppendText(rcvStr)                
             else:
                 self.statusBar.SetStatusText('Serial port not connected')
 
