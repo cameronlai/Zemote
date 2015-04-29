@@ -126,14 +126,12 @@ class serialTerminal(wx.Panel):
                 self.statusBar.SetStatusText('Serial port not connected')
 
 class button_panel(wx.Panel):
-    def __init__(self, parent, serial_queue):
+    def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.parent = parent
         self.core = self.parent.core
         
         # Attributes
-        self.timer = wx.Timer(self)
-        self.timer.Start(300)
         self.channelNum = 6
         self.programMode = False
         self.programCounter = 0
@@ -144,7 +142,6 @@ class button_panel(wx.Panel):
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnButton)        
-        self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
 
     def __DoLayout(self):
         # Button list
@@ -197,6 +194,7 @@ class button_panel(wx.Panel):
         lastActionText = 'Last Action: '
         lastActionStatus = 'Status: '
 
+"""
         if self.serial_queue['connected']:
             btn = evt.GetEventObject()
             btnName = btn.GetName()
@@ -230,6 +228,7 @@ class button_panel(wx.Panel):
         self.lastActionStatus.SetLabel(lastActionStatus)
 
    # Timer event handler
+
     def OnTimer(self, evt):
         if not self.prevConnected:
             if self.serial_queue['connected']:
@@ -265,4 +264,4 @@ class button_panel(wx.Panel):
                 self.programCounter = 0
 
             self.lastActionStatus.SetLabel(lastActionStatus)
-        
+"""        

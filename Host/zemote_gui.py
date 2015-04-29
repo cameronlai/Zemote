@@ -33,12 +33,6 @@ class _zemote_gui_frame(wx.Frame):
         # Initiate ZemoteCore
         self.core = ZemoteCore()
 
-        # tmp 
-        snd_queue = Queue.Queue() # Queue to send from USB
-        rcv_queue = Queue.Queue() # Queue to receive from USB
-        # The flag connected is not protected. May need protection in the future
-        serial_queue = {'connected': False, 'snd': snd_queue, 'rcv': rcv_queue}
-
         # Menu bar
         self.menubar = wx.MenuBar()
         fileMenu = wx.Menu()
@@ -53,7 +47,7 @@ class _zemote_gui_frame(wx.Frame):
         self.statusBar.SetMinHeight(200)
 
         # Panels
-        self.button_panel = button_panel(self, serial_queue)
+        self.button_panel = button_panel(self)
         self.serialToolBar = serialToolBar(self)      
         self.serialTerminal = serialTerminal(self)
 
