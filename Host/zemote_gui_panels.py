@@ -87,22 +87,23 @@ class serialTerminal(wx.Panel):
         self.__DoLayout()   
 
     def __DoLayout(self):
-        self.terminalTextCtrl = wx.TextCtrl(self, -1, "", size=(300, 100),
+        self.terminalTextCtrl = wx.TextCtrl(self, -1, "", size=(300, -1),
                                             style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.terminalTextCtrl.SetMinSize((100, -1))
         self.inputTextCtrl = wx.TextCtrl(self, -1, "", size=(200, -1))
         self.sendButton = wx.Button(self, name='Send', label='Send')
         # Sizer
         botSizer = wx.BoxSizer(wx.HORIZONTAL)
         botSizer.AddMany([
-            (self.inputTextCtrl, 0),
+            (self.inputTextCtrl, 1),
             (self.sendButton, 0),
         ])
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.AddMany([
-            (self.terminalTextCtrl, 0),
+            (self.terminalTextCtrl, 1, wx.EXPAND),
             (botSizer, 0),
         ])
-        self.SetSizer(sizer)
+        self.SetSizerAndFit(sizer)
 
         # Binding 
         self.Bind(wx.EVT_BUTTON, self.OnButton)
@@ -128,7 +129,7 @@ class button_panel(wx.Panel):
     def __init__(self, parent, serial_queue):
         wx.Panel.__init__(self, parent)
         self.parent = parent
-        self.serial_queue = serial_queue
+        self.core = self.parent.core
         
         # Attributes
         self.timer = wx.Timer(self)
