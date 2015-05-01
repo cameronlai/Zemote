@@ -47,7 +47,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 """
-X        info = wx.AboutDialogInfo()
+        info = wx.AboutDialogInfo()
 
         #info.SetIcon(wx.Icon('zemote.png', wx.BITMAP_TYPE_PNG))
         info.SetName('Zemote')
