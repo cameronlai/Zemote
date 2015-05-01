@@ -12,15 +12,14 @@
 # Lesser General Public License for more details.
 
 import wx
-import time
-import threading
-import Queue
 from zemote_gui_panels import *
 from ZemoteCore import *
+from gui.myMenuBar import myMenuBar
+from gui.serialTerminal import serialTerminal
+from gui.serialToolBar import serialToolBar
 
 class zemote_gui():
     def __init__(self):
-        print 'Zemote Host Initialized'
         APP = wx.App(False)
         FRAME = _zemote_gui_frame(None)
         FRAME.Show()
@@ -35,14 +34,9 @@ class _zemote_gui_frame(wx.Frame):
         self.core = ZemoteCore()
 
         # Menu bar
-        self.menubar = wx.MenuBar()
-        fileMenu = wx.Menu()
-        fitem = fileMenu.Append(wx.ID_EXIT, 'Quit', 'Quit application')
-        self.menubar.Append(fileMenu, '&File')
-        self.SetMenuBar(self.menubar)
-
-        self.Bind(wx.EVT_MENU, self.OnQuit, fitem)
-
+        self.menubar = myMenuBar(self)  
+        self.SetMenuBar(self.menubar.menubar)
+ 
         # Status bar
         self.statusBar = self.CreateStatusBar()
         self.statusBar.SetMinHeight(200)
@@ -70,7 +64,8 @@ class _zemote_gui_frame(wx.Frame):
         self.SetSizer(sizer)
         self.SetMinSize((600, 400))
 
-    def OnQuit(self, evt):
+    def OnQuit(self, e):
         self.core.continue_read_thread = False
-        evt.Skip()
+        self.Destroy()
+
 
