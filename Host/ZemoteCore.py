@@ -25,7 +25,7 @@ class ZemoteCore():
         self.port = None
         self.baudrate = None
 
-        self.read_thread = None
+        self.read_thread = threading.Thread(target = self._listen)
         self.read_thread_cb = None # Call back function for line read from serial port
         self.continue_read_thread = False
         self.read_thread_buffer = None
@@ -39,8 +39,7 @@ class ZemoteCore():
             try:                
                 self.s = serial.Serial(self.port, self.baudrate, timeout=1)
                 self.connected = True
-                # Set up read thread
-                self.read_thread = threading.Thread(target = self._listen)
+                # Start read thread
                 self.read_thread.start()
 
                 if self.debug:

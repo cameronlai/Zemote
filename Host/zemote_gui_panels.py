@@ -44,7 +44,6 @@ class serialToolBar(wx.Panel):
         self.SetSizer(sizer)
         
         # Binding
-        #self.Bind(wx.EVT_COMBOBOX, self.OnSelec)
         self.Bind(wx.EVT_BUTTON, self.OnButton)
     
     def rescanSerialPorts(self):
@@ -83,6 +82,8 @@ class serialTerminal(wx.Panel):
         self.parent = parent
         self.core = self.parent.core
         self.statusBar = self.parent.statusBar
+        self.history = [] # 0: latest command
+        self.historyIndex = 0;
        
         self.__DoLayout()   
 
@@ -90,7 +91,8 @@ class serialTerminal(wx.Panel):
         self.terminalTextCtrl = wx.TextCtrl(self, -1, "", size=(300, -1),
                                             style=wx.TE_MULTILINE|wx.TE_READONLY)
         self.terminalTextCtrl.SetMinSize((100, -1))
-        self.inputTextCtrl = wx.TextCtrl(self, -1, "", size=(200, -1))
+        self.inputTextCtrl = wx.TextCtrl(self, -1, "", size=(200, -1),
+                                         style=wx.TE_PROCESS_ENTER)
         self.sendButton = wx.Button(self, name='Send', label='Send')
         # Sizer
         botSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -106,24 +108,47 @@ class serialTerminal(wx.Panel):
         self.SetSizerAndFit(sizer)
 
         # Binding 
-        self.Bind(wx.EVT_BUTTON, self.OnButton)
+        self.sendButton.Bind(wx.EVT_BUTTON, self.OnSend)
+        self.inputTextCtrl.Bind(wx.EVT_CHAR, self.OnChar)
 
         self.core.read_thread_buffer = self.terminalTextCtrl
 
     def updateTerminal(self, line):
         self.terminalTextCtrl.AppendText(line)
 
-    def OnButton(self, evt):
-        btn = evt.GetEventObject()
-        btnName = btn.GetName()
-        btnLabel = btn.GetLabel()
+    def setCommand(self, direction):
+        print self.history
+        print self.historyIndex
+        if (len(self.history) == 0):
+            return
+        elif (direction == -1 and self.historyIndex==0):
+            return
+        elif (direction == 1 and self.historyIndex+1 == len(self.history)):
+            return
+        else:            
+            self.historyIndex += direction
+            self.inputTextCtrl.SetValue(self.history[self.historyIndex])
 
-        if btnName == 'Send':
-            if self.core.connected:
-                cmd = self.core.send(self.inputTextCtrl.GetValue())
-                self.terminalTextCtrl.AppendText(cmd)
-            else:
-                self.statusBar.SetStatusText('Serial port not connected')
+    def OnSend(self, evt):
+        if self.core.connected:
+            rawCmd = self.inputTextCtrl.GetValue()
+            cmd = self.core.send(rawCmd)
+            self.terminalTextCtrl.AppendText(cmd)
+            self.history.insert(0, rawCmd)
+            self.inputTextCtrl.SetValue('')
+        else:
+            self.statusBar.SetStatusText('Serial port not connected')
+
+    def OnChar(self, evt):      
+        code = evt.GetKeyCode()
+        print code
+        if code == wx.WXK_RETURN:
+            self.OnSend(None)
+        if code == wx.WXK_UP:
+            self.setCommand(1)
+        if code == wx.WXK_DOWN:
+            self.setCommand(-1)
+        evt.Skip()
 
 class button_panel(wx.Panel):
     def __init__(self, parent):

@@ -29,6 +29,7 @@ class zemote_gui():
 class _zemote_gui_frame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, title="Zemote", size=(600, 400))      
+        self.Bind(wx.EVT_CLOSE, self.OnQuit)
         
         # Initiate ZemoteCore
         self.core = ZemoteCore()
@@ -69,6 +70,7 @@ class _zemote_gui_frame(wx.Frame):
         self.SetSizer(sizer)
         self.SetMinSize((600, 400))
 
-    def OnQuit(self, e):
-        self.Close()
+    def OnQuit(self, evt):
+        self.core.continue_read_thread = False
+        evt.Skip()
 
