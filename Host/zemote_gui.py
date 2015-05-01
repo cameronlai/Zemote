@@ -12,11 +12,13 @@
 # Lesser General Public License for more details.
 
 import wx
-from zemote_gui_panels import *
 from ZemoteCore import *
+
+# gui
 from gui.myMenuBar import myMenuBar
 from gui.serialTerminal import serialTerminal
 from gui.serialToolBar import serialToolBar
+from gui.mainPanel import mainPanel
 
 class zemote_gui():
     def __init__(self):
@@ -27,7 +29,8 @@ class zemote_gui():
 
 class _zemote_gui_frame(wx.Frame):
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent, title="Zemote", size=(600, 400))      
+        wx.Frame.__init__(self, parent, title="Zemote", size=(600, 500))      
+        self.SetMinSize((600, 500))
         self.Bind(wx.EVT_CLOSE, self.OnQuit)
         
         # Initiate ZemoteCore
@@ -42,17 +45,17 @@ class _zemote_gui_frame(wx.Frame):
         self.statusBar.SetMinHeight(200)
 
         # Panels
-        self.button_panel = button_panel(self)
+        self.mainPanel = mainPanel(self)
         self.serialToolBar = serialToolBar(self)      
         self.serialTerminal = serialTerminal(self)
 
         # ZemoteCore - assign call backs
-        self.core.read_thread_cb = self.serialTerminal.updateTerminal
+        self.core.setDisplayCallBack(self.serialTerminal.updateTerminal)
 
         # Layout
         botSizer = wx.BoxSizer(wx.HORIZONTAL)
         botSizer.AddMany([
-            (self.button_panel, 1, wx.EXPAND),
+            (self.mainPanel, 1, wx.EXPAND),
             (self.serialTerminal, 1, wx.EXPAND),
             ((15, 15), 0),
         ])
@@ -62,7 +65,6 @@ class _zemote_gui_frame(wx.Frame):
             (botSizer, 1, wx.EXPAND),
         ])
         self.SetSizer(sizer)
-        self.SetMinSize((600, 400))
 
     def OnQuit(self, e):
         self.core.continue_read_thread = False

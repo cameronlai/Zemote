@@ -69,8 +69,7 @@ class serialTerminal(wx.Panel):
     def OnSend(self, evt):
         if self.core.connected:
             rawCmd = self.inputTextCtrl.GetValue()
-            cmd = self.core.send(rawCmd)
-            self.terminalTextCtrl.AppendText(cmd)
+            self.core.send(rawCmd)
             self.history.insert(0, rawCmd)
             self.inputTextCtrl.SetValue('')
         else:
@@ -78,7 +77,6 @@ class serialTerminal(wx.Panel):
 
     def OnChar(self, evt):      
         code = evt.GetKeyCode()
-        print code
         if code == wx.WXK_RETURN:
             self.OnSend(None)
         if code == wx.WXK_UP:

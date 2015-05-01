@@ -27,9 +27,11 @@ class ZemoteCore():
         self.baudrate = None
 
         self.read_thread = None
-        self.read_thread_cb = None # Call back function for line read from serial port
+        self.display_msg_cb = None # Call back function for line read from serial port
         self.continue_read_thread = False
         self.read_thread_buffer = None
+
+        self.programMode = False
 
     def connect(self, port = None, baudrate = None):
         if port is not None:
@@ -81,38 +83,61 @@ class ZemoteCore():
         returnString =''
         try:
             self.s.write(sendCmd.encode())
-            displayCmd = 'SND:' + sendCmd
+            wx.CallAfter(self.display_msg_cb, '>>> ' + sendCmd)
             if self.debug:
                 print 'SND:' + cmd
-            return displayCmd
         except:
             if self.debug:
                 print('Failed to write to the serial device')
-            return None
-
-    def receive(self):
-        try:
-            returnStr = self.s.readline()
-            if returnStr:
-                if self.debug:
-                    print 'RCV:'+ returnStr
-                return returnStr
-        except:
-            self.disconnect()
-            if self.debug:
-                print('Failed to receive from serial device')            
-        return ''
 
     def _listen(self):
         self.continue_read_thread = True
         while self.continue_read_thread:
             try:
                 line = self.s.readline()
-                if line is not '':
-                    print 'RCV:' + line
-                    wx.CallAfter(self.read_thread_cb, line)                    
+                if line is not '':             
+                    wx.CallAfter(self.display_msg_cb, line)
+                    if line == 'ok - F': # end of program mode
+                        self.programMode = False                        
+                    if self.debug:
+                        print 'RCV:' + line
             except:
+                if self.debug:
+                    print('Failed to receive from serial device')            
                 continue               
-                
-        
+    
+    def setDisplayCallBack(self, function):
+        self.display_msg_cb = function
+
+    def startProgramMode(self, btnIndex):
+        if self.connected:
+            self.send('P'+str(btnIndex))
+            self.programMode = True
+            return True
+        else:
+            return False
+
+    def endProgramMode(self):
+        if self.connected:            
+            self.send('F')
+            self.programMode = False
+            return True
+        else:
+            return False
+
+    def testButton(self, btnIndex):
+        if self.connected:
+            self.send('T'+str(btnIndex))
+            return True
+        else:
+            return False
+
+    def saveToEEPROM(self):
+        if self.connected:
+            self.send('S')
+            return True
+        else:
+            return False
+
+
 
