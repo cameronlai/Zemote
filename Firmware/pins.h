@@ -33,4 +33,6 @@
 // IR transmitter output uses Timer 2A, which is on pin 3
 // This is hard coded in the IR Remote library
 
+#define DEBUG 0
+
 #endif

@@ -15,7 +15,6 @@
  */
 
 #define VERSION_NUM 0.1
-#define DEBUG 0
 
 #include <IRremote.h>
 #include <EEPROM.h>

@@ -18,6 +18,7 @@
 #define transceive_h
 
 #define NUM_SOFT_BUTTONS 9
+#define MAX_SOFT_BUTTONS_IDX 8
 #define NUM_COMMANDS_PER_BUTTON 8
 #define NUM_BYTES_PER_COMMAND 6
 

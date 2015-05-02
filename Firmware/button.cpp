@@ -27,6 +27,9 @@ long lastDebounceTime[NUM_PHY_BUTTONS] = {
   0};
 char current_channel = HOME_CHANNEL;
 
+// Local functions
+void findAvailableChannel(int change);
+
 /**
  * \fn check_buttons()
  * \brief button checking loop
@@ -69,22 +72,46 @@ void button_send_handler(unsigned char button){
     sndIRStream(HOME_CHANNEL);
     break;
   case 4: // Channel Plus Button
-    current_channel++;
-    if (current_channel >= NUM_SOFT_BUTTONS) current_channel = HOME_CHANNEL;
+    findAvailableChannel(1);
+#if DEBUG==1
+    Serial.println(current_channel, DEC);
+#endif
     sndIRStream(current_channel);
-    Serial.println(current_channel);
     break;
   case 5: // Channel Minus Button
-    current_channel--;
-    if (current_channel < HOME_CHANNEL) current_channel = NUM_SOFT_BUTTONS-1;
+    findAvailableChannel(-1);
+#if DEBUG==1
+    Serial.println(current_channel, DEC);
+#endif
     sndIRStream(current_channel);
-    Serial.println(current_channel);
     break;
   default:
     sndIRStream(button);
     break;
   }
 }
+
+void findAvailableChannel(int change)
+{
+  for (int i = 1; i <= NUM_PHY_BUTTONS; i+=change)
+  {
+    current_channel += change;
+    if (current_channel < HOME_CHANNEL) 
+    {
+      current_channel = MAX_SOFT_BUTTONS_IDX;
+    } 
+    if (current_channel > MAX_SOFT_BUTTONS_IDX) 
+    {
+      current_channel = HOME_CHANNEL;
+    }
+    if(user_cmd_len[current_channel] != 0)
+    {
+      break; 
+    }
+  }    
+}
+
+
 
 
 

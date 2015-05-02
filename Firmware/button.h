@@ -18,6 +18,7 @@
 #define button_h
 
 #define NUM_PHY_BUTTONS 6
+#define NUM_CHANNELS 6
 #define HOME_CHANNEL 3
 #define DEBOUNCE_DELAY 50 // ms
 
