@@ -24,7 +24,7 @@ zemote_decode user_cmd[NUM_SOFT_BUTTONS][NUM_COMMANDS_PER_BUTTON] = {
   0};
 char user_cmd_len[9] = {
   0};
-  boolean programModeFlag = false;
+boolean programModeFlag = false;
 
 // Local variables
 int RECV_PIN = IR_RECV_PIN;
@@ -32,6 +32,10 @@ IRrecv irrecv(RECV_PIN);
 IRsend irsend;
 decode_results results;
 int user_cmd_index=0;
+
+// Local functions
+void printResultsInfo(int index, zemote_decode localResults);
+void printDecodeTypeString(int decode_type);
 
 /**
  * \fn void sndIRStream(unsigned char button)
@@ -49,7 +53,8 @@ void sndIRStream(unsigned char button)
       protocol = user_cmd[button][i].decode_type;
       tmpValue = user_cmd[button][i].value;
       tmpBits = user_cmd[button][i].bits;
-      switch(protocol){
+      switch(protocol)
+      {
       case NEC:
         irsend.sendNEC(tmpValue, tmpBits);
         break;
@@ -72,7 +77,7 @@ void sndIRStream(unsigned char button)
         irsend.sendPanasonic(tmpValue, tmpBits); 
         break; 
       case JVC:
-        irsend.sendJVC(tmpValue, tmpBits);
+        irsend.sendJVC(tmpValue, tmpBits, 1); // With JVC repeat signal
         break;
       case SAMSUNG:
         irsend.sendSAMSUNG(tmpValue, tmpBits);
@@ -85,15 +90,15 @@ void sndIRStream(unsigned char button)
 
 void enableIRReceive()
 {
-    irrecv.enableIRIn(); // Start the receiver
-    programModeFlag = true;
-    user_cmd_index = 0;
-    user_cmd_len[activeBtnNum] = 0;
+  irrecv.enableIRIn(); // Start the receiver
+  programModeFlag = true;
+  user_cmd_index = 0;
+  user_cmd_len[activeBtnNum] = 0;
 }
 
 void disableIRReceive()
 {
-    programModeFlag = false;
+  programModeFlag = false;
 }
 
 /**
@@ -102,30 +107,28 @@ void disableIRReceive()
  */
 boolean rcvIRStream()
 {
-    if (irrecv.decode(&results))
+  if (irrecv.decode(&results))
+  {
+    if (results.bits)
     {
-      if (results.bits)
-      {
-        Serial.print(results.decode_type);        
-        Serial.print(", 0x");
-        Serial.println(results.value, HEX);
-        
-        // Only extract useful information from decode_results data type
-        zemote_decode tmpCmd;
-        tmpCmd.decode_type = (unsigned char)results.decode_type;
-        tmpCmd.value = (unsigned long)results.value;
-        tmpCmd.bits = (unsigned char)results.bits;
+      // Only extract useful information from decode_results data type
+      zemote_decode tmpCmd;
+      tmpCmd.decode_type = (unsigned char)results.decode_type;
+      tmpCmd.value = (unsigned long)results.value;
+      tmpCmd.bits = (unsigned char)results.bits;
 
-        user_cmd[activeBtnNum][user_cmd_index++] = tmpCmd;
-        user_cmd_len[activeBtnNum]++;
-      }
-      irrecv.resume(); // Receive the next value
-    }    
-    if (user_cmd_len[activeBtnNum] >= NUM_COMMANDS_PER_BUTTON) 
-    {
-      return false;
+      user_cmd[activeBtnNum][user_cmd_index++] = tmpCmd;
+      user_cmd_len[activeBtnNum]++;
+      
+      printResultsInfo(user_cmd_index, tmpCmd);
     }
-    return true;
+    irrecv.resume(); // Receive the next value
+  }    
+  if (user_cmd_len[activeBtnNum] >= NUM_COMMANDS_PER_BUTTON) 
+  {
+    return false;
+  }
+  return true;
 }
 
 void serial_ack(char cmd)
@@ -146,16 +149,56 @@ void printButtonInfo(unsigned char button)
   {
     for(int i=0;i<user_cmd_len[button];i++)
     {
-      Serial.print(i);
-      Serial.print(", ");
-      
-      Serial.print(user_cmd[button][0].decode_type);
-      
-      Serial.print(", 0x");
-      Serial.println(user_cmd[button][i].value, HEX);
+      printResultsInfo(i, user_cmd[button][i]);
     }
   }  
 }
+
+void printResultsInfo(int index, zemote_decode localResults)
+{
+  Serial.print(index);
+  Serial.print(", ");
+  printDecodeTypeString(localResults.decode_type);
+  Serial.print(", 0x");
+  Serial.println(localResults.value, HEX);
+}
+
+void printDecodeTypeString(int decode_type)
+{
+  switch (decode_type)
+  {
+  case NEC:
+    Serial.print("NEC");
+    break;
+  case SONY:
+    Serial.print("SONY");
+    break;
+  case RC5:
+    Serial.print("RC5");
+    break;
+  case RC6:
+    Serial.print("RC6");
+    break;
+  case DISH:
+    Serial.print("DISH");
+    break;
+  case SHARP:
+    Serial.print("SHARP");
+    break;
+  case PANASONIC:
+    Serial.print("PANASONIC");
+    break; 
+  case JVC:
+    Serial.print("JVC");
+    break;
+  case SAMSUNG:
+    Serial.print("SAMSUNG");
+    break;      
+  } 
+}
+
+
+
 
 
 
