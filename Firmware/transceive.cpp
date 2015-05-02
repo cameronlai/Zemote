@@ -70,7 +70,13 @@ void sndIRStream(unsigned char button)
         break;
       case PANASONIC:
         irsend.sendPanasonic(tmpValue, tmpBits); 
-        break;   
+        break; 
+      case JVC:
+        irsend.sendJVC(tmpValue, tmpBits);
+        break;
+      case SAMSUNG:
+        irsend.sendSAMSUNG(tmpValue, tmpBits);
+        break;      
       }
       delay(200);
     }
@@ -140,7 +146,11 @@ void printButtonInfo(unsigned char button)
   {
     for(int i=0;i<user_cmd_len[button];i++)
     {
+      Serial.print(i);
+      Serial.print(", ");
+      
       Serial.print(user_cmd[button][0].decode_type);
+      
       Serial.print(", 0x");
       Serial.println(user_cmd[button][i].value, HEX);
     }
