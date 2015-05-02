@@ -39,7 +39,6 @@ class mainPanel(wx.Panel):
         # Buttons in host software
         buttonPanel = wx.Panel(self)
         self.programButton = wx.Button(buttonPanel, name='Program', label='Program')
-        self.finishButton = wx.Button(buttonPanel, name='Finish', label='Finish')
         self.getInfoButton = wx.Button(buttonPanel, name='Get Info', label='Get Info')
         self.testButton = wx.Button(buttonPanel, -1, name='Test', label='Test')
         self.saveToEEPROMButton = wx.Button(buttonPanel, -1, name='Save', label='Save all')
@@ -49,19 +48,17 @@ class mainPanel(wx.Panel):
         self.getInfoButton.Bind(wx.EVT_BUTTON, self.OnGetInfo)
         self.testButton.Bind(wx.EVT_BUTTON, self.OnTest)        
         self.programButton.Bind(wx.EVT_BUTTON, self.OnProgram)        
-        self.finishButton.Bind(wx.EVT_BUTTON, self.OnFinish)
         self.saveToEEPROMButton.Bind(wx.EVT_BUTTON, self.OnSave)        
         self.resetAllButton.Bind(wx.EVT_BUTTON, self.OnResetAll)
 
         # Button list sizer
-        buttonSizer = wx.GridSizer(3,2,10,10)
+        buttonSizer = wx.GridBagSizer(3,2)
+        buttonSizer.Add(self.programButton, pos=(1,0), span=(1, 2), flag=wx.EXPAND)
         buttonSizer.AddMany([
-            (self.programButton, 0),
-            (self.finishButton, 0),
-            (self.testButton, 0),
-            (self.getInfoButton, 0),
-            (self.saveToEEPROMButton, 0),
-            (self.resetAllButton, 0),
+            (self.testButton, (2,0)),
+            (self.getInfoButton, (2,1)),
+            (self.saveToEEPROMButton, (3,0)),
+            (self.resetAllButton, (3,1)),
         ])
         buttonPanel.SetSizer(buttonSizer)
 
@@ -84,12 +81,14 @@ class mainPanel(wx.Panel):
         self.core.testButton(buttonListIndex)
 
     def OnProgram(self, e):
-        buttonListIndex = self.buttonList.GetFocusedItem()
-        self.core.startProgramMode(buttonListIndex)
+        if not self.core.programMode:            
+            buttonListIndex = self.buttonList.GetFocusedItem()
+            if self.core.startProgramMode(buttonListIndex):
+                self.programButton.SetLabel('Finish')
+        else:
+            if self.core.endProgramMode():
+                self.programButton.SetLabel('Program')
 
-    def OnFinish(self, e):
-        self.core.endProgramMode()
-    
     def OnSave(self, e):
         self.core.saveToEEPROM()
 

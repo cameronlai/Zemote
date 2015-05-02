@@ -104,9 +104,7 @@ class ZemoteCore():
             if not self.connected:
                 wx.CallAfter(self.display_status_cb, self.title + ' is not connected')
             else:
-                wx.CallAfter(self.display_status_cb, 'Fail to write to ' + self.title)
-            if self.debug:
-                print('Failed to write to the serial device')
+                wx.CallAfter(self.display_status_cb, 'Fail to write to ' + self.title)            
             return False
 
     def _listen(self):
@@ -124,7 +122,9 @@ class ZemoteCore():
                 if self.debug:
                     print('Failed to receive from serial device. Disconnected.')
                 continue               
-    
+
+    # Centralized UI Call back functions
+
     def setDisplayMsgCallBack(self, function):
         self.display_msg_cb = function
 
@@ -137,24 +137,28 @@ class ZemoteCore():
     # All functions below are based on pre-defined protocols
 
     def startProgramMode(self, btnIndex):
-        if self.send('P'+str(btnIndex)):
+        ret = self.send('P'+str(btnIndex))
+        if ret:
             self.programMode = True
+        return ret
 
     def endProgramMode(self):        
-        if self.send('F'):
+        ret = self.send('F')
+        if ret:
             self.programMode = False
+        return ret
             
     def getButtonInfo(self, btnIndex):
-        self.send('G' + str(btnIndex))
+        return self.send('G' + str(btnIndex))
 
     def testButton(self, btnIndex):
-        self.send('T'+str(btnIndex))
+        return self.send('T'+str(btnIndex))
 
     def saveToEEPROM(self):
-        self.send('S')
+        return self.send('S')
     
     def resetAllToEEPROM(self):
-        self.send('R')
+        return self.send('R')
 
 
 
