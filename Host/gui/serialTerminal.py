@@ -75,13 +75,10 @@ class serialTerminal(wx.Panel):
             self.inputTextCtrl.SetValue(self.history[self.historyIndex])
 
     def OnSend(self, e):
-        if self.core.connected:
-            rawCmd = self.inputTextCtrl.GetValue()
-            self.core.send(rawCmd)
+        rawCmd = self.inputTextCtrl.GetValue()
+        if self.core.send(rawCmd):
             self.history.insert(0, rawCmd)
-            self.inputTextCtrl.SetValue('')
-        else:
-            self.statusBar.SetStatusText('Serial port not connected')
+        self.inputTextCtrl.SetValue('')
 
     def OnClear(self, e):
         self.terminalTextCtrl.Clear()

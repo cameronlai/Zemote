@@ -19,6 +19,7 @@ import wx
 
 class ZemoteCore():
     def __init__(self):
+        self.title = 'Zemote'
         self.s = None
         self.read_thread = None
         self.debug = True
@@ -27,11 +28,15 @@ class ZemoteCore():
         self.baudrate = None
 
         self.read_thread = None
-        self.display_msg_cb = None # Call back function for line read from serial port
         self.continue_read_thread = False
         self.read_thread_buffer = None
 
         self.programMode = False
+
+        # Call back functions for UI
+        self.display_msg_cb = None # Call back function for line read from serial port        
+        self.display_connection_action_cb = None # Call back for connection action
+        self.display_status_cb = None # Call back for status bar update
 
     def connect(self, port = None, baudrate = None):
         if port is not None:
@@ -42,9 +47,14 @@ class ZemoteCore():
             try:                
                 self.s = serial.Serial(self.port, self.baudrate, timeout=1)
                 self.connected = True
-                # Start read thread
+                # Read thread
+                self.continue_read_thread = True        
                 self.read_thread = threading.Thread(target = self._listen)
                 self.read_thread.start()
+                time.sleep(1)
+                # UI
+                wx.CallAfter(self.display_connection_action_cb, 'Disconnect')
+                wx.CallAfter(self.display_status_cb, self.title + ' is connected!')
                 if self.debug:
                     print('Serial device is connected!')                
                 return True
@@ -52,16 +62,19 @@ class ZemoteCore():
                 if self.debug:
                     print('Serial device cannot be connected!')
                 return False
-        return False
     
     def disconnect(self):
         try:
             self.s.close()
             self.connected = False
+            # Read thread
+            self.continue_read_thread = False
             if self.read_thread:
-                self.continue_read_thread = False
                 if threading.current_thread() != self.read_thread:
                     self.read_thread.join()
+            # UI
+            wx.CallAfter(self.display_connection_action_cb, 'Connect')
+            wx.CallAfter(self.display_status_cb, self.title + ' is disconnected!')
             if self.debug:
                 print('Serial device is disconnected!')
             return True
@@ -86,12 +99,17 @@ class ZemoteCore():
             wx.CallAfter(self.display_msg_cb, '>>> ' + sendCmd)
             if self.debug:
                 print 'SND:' + cmd
+            return True
         except:
+            if not self.connected:
+                wx.CallAfter(self.display_status_cb, self.title + ' is not connected')
+            else:
+                wx.CallAfter(self.display_status_cb, 'Fail to write to ' + self.title)
             if self.debug:
                 print('Failed to write to the serial device')
+            return False
 
     def _listen(self):
-        self.continue_read_thread = True
         while self.continue_read_thread:
             try:
                 line = self.s.readline()
@@ -101,13 +119,22 @@ class ZemoteCore():
                         self.programMode = False                        
                     if self.debug:
                         print 'RCV:' + line
-            except:
+            except:                
+                self.disconnect()
                 if self.debug:
-                    print('Failed to receive from serial device')            
+                    print('Failed to receive from serial device. Disconnected.')
                 continue               
     
-    def setDisplayCallBack(self, function):
+    def setDisplayMsgCallBack(self, function):
         self.display_msg_cb = function
+
+    def setDisplayActionCallBack(self, function):
+        self.display_connection_action_cb = function
+
+    def setDisplayStatusCallBack(self, function):
+        self.display_status_cb = function
+
+    # All functions below are based on pre-defined protocols
 
     def startProgramMode(self, btnIndex):
         if self.connected:

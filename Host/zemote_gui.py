@@ -50,8 +50,10 @@ class _zemote_gui_frame(wx.Frame):
         self.serialTerminal = serialTerminal(self)
 
         # ZemoteCore - assign call backs
-        self.core.setDisplayCallBack(self.serialTerminal.updateTerminal)
-
+        self.core.setDisplayMsgCallBack(self.serialTerminal.updateTerminal)
+        self.core.setDisplayActionCallBack(self.serialToolBar.updateConnectionAction)
+        self.core.setDisplayStatusCallBack(self.statusBar.SetStatusText)        
+        
         # Layout
         botSizer = wx.BoxSizer(wx.HORIZONTAL)
         botSizer.AddMany([

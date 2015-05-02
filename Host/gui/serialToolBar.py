@@ -12,7 +12,6 @@
 # Lesser General Public License for more details.
 
 import wx
-import time
 
 class serialToolBar(wx.Panel):
     def __init__(self, parent):
@@ -46,8 +45,7 @@ class serialToolBar(wx.Panel):
             (self.baudRatesComboBox, 0),
             (self.connectButton, 0),
         ])
-        self.SetSizer(sizer)
-        
+        self.SetSizer(sizer)        
     
     def OnRefresh(self, e):
         self.serialPorts = self.core.scanSerialPort()
@@ -60,20 +58,12 @@ class serialToolBar(wx.Panel):
             self.serialPortsComboBox.SetValue('')
 
     def OnConnect(self, e):
-        statusText = ''
         if self.core.connected:
-            if self.core.disconnect():
-                self.connectButton.SetLabel('Connect')
-                statusText = 'Zemote is disconnected!'
-            else:
-                statusText = 'Zemote could not be disconnected!'
+            self.core.disconnect()
         else:
             port = self.serialPortsComboBox.GetValue()
             baudRate = self.baudRatesComboBox.GetValue()
-            if self.core.connect(port, baudRate):
-                self.connectButton.SetLabel('Disconnect')
-                statusText = 'Zemote is connected!'
-                time.sleep(1)
-            else:
-                statusText = 'Zemote cannot be connected!'
-        self.statusBar.SetStatusText(statusText)
+            self.core.connect(port, baudRate)
+
+    def updateConnectionAction(self, label):
+        self.connectButton.SetLabel(label)
