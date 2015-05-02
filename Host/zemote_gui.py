@@ -53,6 +53,7 @@ class _zemote_gui_frame(wx.Frame):
         self.core.setDisplayMsgCallBack(self.serialTerminal.updateTerminal)
         self.core.setDisplayActionCallBack(self.serialToolBar.updateConnectionAction)
         self.core.setDisplayStatusCallBack(self.statusBar.SetStatusText)        
+        self.core.setDisplayProgramModeCallBack(self.mainPanel.programButton.SetLabel)
         
         # Layout
         botSizer = wx.BoxSizer(wx.HORIZONTAL)

@@ -37,6 +37,7 @@ class ZemoteCore():
         self.display_msg_cb = None # Call back function for line read from serial port        
         self.display_connection_action_cb = None # Call back for connection action
         self.display_status_cb = None # Call back for status bar update
+        self.display_program_mode_cb = None # Call back for program button
 
     def connect(self, port = None, baudrate = None):
         if port is not None:
@@ -113,8 +114,9 @@ class ZemoteCore():
                 line = self.s.readline()
                 if line is not '':             
                     wx.CallAfter(self.display_msg_cb, line)
-                    if line == 'ok - F': # end of program mode
-                        self.programMode = False                        
+                    if 'ok - F' in line: # end of program mode
+                        self.programMode = False
+                        wx.CallAfter(self.display_program_mode_cb, 'Program')
                     if self.debug:
                         print 'RCV:' + line
             except:                
@@ -133,6 +135,9 @@ class ZemoteCore():
 
     def setDisplayStatusCallBack(self, function):
         self.display_status_cb = function
+
+    def setDisplayProgramModeCallBack(self, function):
+        self.display_program_mode_cb = function
 
     # All functions below are based on pre-defined protocols
 
