@@ -124,6 +124,13 @@ class ZemoteCore():
             return True
         else:
             return False
+            
+    def getButtonInfo(self, btnIndex):
+        if self.connected:
+            self.send('G' + str(btnIndex))
+            return True
+        else:
+            return False
 
     def testButton(self, btnIndex):
         if self.connected:
