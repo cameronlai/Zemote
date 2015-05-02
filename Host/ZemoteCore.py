@@ -137,41 +137,24 @@ class ZemoteCore():
     # All functions below are based on pre-defined protocols
 
     def startProgramMode(self, btnIndex):
-        if self.connected:
-            self.send('P'+str(btnIndex))
+        if self.send('P'+str(btnIndex)):
             self.programMode = True
-            return True
-        else:
-            return False
 
-    def endProgramMode(self):
-        if self.connected:            
-            self.send('F')
+    def endProgramMode(self):        
+        if self.send('F'):
             self.programMode = False
-            return True
-        else:
-            return False
             
     def getButtonInfo(self, btnIndex):
-        if self.connected:
-            self.send('G' + str(btnIndex))
-            return True
-        else:
-            return False
+        self.send('G' + str(btnIndex))
 
     def testButton(self, btnIndex):
-        if self.connected:
-            self.send('T'+str(btnIndex))
-            return True
-        else:
-            return False
+        self.send('T'+str(btnIndex))
 
     def saveToEEPROM(self):
-        if self.connected:
-            self.send('S')
-            return True
-        else:
-            return False
+        self.send('S')
+    
+    def resetAllToEEPROM(self):
+        self.send('R')
 
 
 

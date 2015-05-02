@@ -43,15 +43,15 @@ class mainPanel(wx.Panel):
         self.getInfoButton = wx.Button(buttonPanel, name='Get Info', label='Get Info')
         self.testButton = wx.Button(buttonPanel, -1, name='Test', label='Test')
         self.saveToEEPROMButton = wx.Button(buttonPanel, -1, name='Save', label='Save all')
-        self.readFromEEPROMButton = wx.Button(buttonPanel, -1, name='Reset', label='Reset all')
+        self.resetAllButton = wx.Button(buttonPanel, -1, name='Reset', label='Reset all')
 
         # Binding
         self.getInfoButton.Bind(wx.EVT_BUTTON, self.OnGetInfo)
         self.testButton.Bind(wx.EVT_BUTTON, self.OnTest)        
         self.programButton.Bind(wx.EVT_BUTTON, self.OnProgram)        
         self.finishButton.Bind(wx.EVT_BUTTON, self.OnFinish)
-        self.saveToEEPROMButton.Bind(wx.EVT_BUTTON, self.OnSaveToEEPROM)        
-        self.readFromEEPROMButton.Bind(wx.EVT_BUTTON, self.OnReadFromEEPROM)        
+        self.saveToEEPROMButton.Bind(wx.EVT_BUTTON, self.OnSave)        
+        self.resetAllButton.Bind(wx.EVT_BUTTON, self.OnResetAll)
 
         # Button list sizer
         buttonSizer = wx.GridSizer(3,2,10,10)
@@ -61,7 +61,7 @@ class mainPanel(wx.Panel):
             (self.testButton, 0),
             (self.getInfoButton, 0),
             (self.saveToEEPROMButton, 0),
-            (self.readFromEEPROMButton, 0),
+            (self.resetAllButton, 0),
         ])
         buttonPanel.SetSizer(buttonSizer)
 
@@ -77,29 +77,21 @@ class mainPanel(wx.Panel):
 
     def OnGetInfo(self, e):
         buttonListIndex = self.buttonList.GetFocusedItem()
-        if not self.core.getButtonInfo(buttonListIndex):
-            self.setStatusBarNotConnected()
+        self.core.getButtonInfo(buttonListIndex)
 
     def OnTest(self, e):
         buttonListIndex = self.buttonList.GetFocusedItem()
-        if not self.core.testButton(buttonListIndex):
-            self.setStatusBarNotConnected()
+        self.core.testButton(buttonListIndex)
 
     def OnProgram(self, e):
         buttonListIndex = self.buttonList.GetFocusedItem()
-        if not self.core.startProgramMode(buttonListIndex):
-            self.setStatusBarNotConnected()
+        self.core.startProgramMode(buttonListIndex)
 
     def OnFinish(self, e):
-        if not self.core.endProgramMode():
-            self.setStatusBarNotConnected()
+        self.core.endProgramMode()
+    
+    def OnSave(self, e):
+        self.core.saveToEEPROM()
 
-    def OnSaveToEEPROM(self, e):
-        if not self.core.saveToEEPROM():
-            self.setStatusBarNotConnected()
-
-    def OnReadFromEEPROM(self, e):
-        buttonListIndex = self.buttonList.GetFocusedItem()
-
-    def setStatusBarNotConnected(self):
-        self.parent.statusBar.SetStatusText('Serial device not connected!')
+    def OnResetAll(self, e):
+        self.core.resetAllToEEPROM()
