@@ -149,7 +149,7 @@ void printButtonInfo(unsigned char button)
   {
     for(int i=0;i<user_cmd_len[button];i++)
     {
-      printResultsInfo(i, user_cmd[button][i]);
+      printResultsInfo(i+1, user_cmd[button][i]);
     }
   }  
 }
