@@ -24,12 +24,14 @@ zemote_decode user_cmd[NUM_SOFT_BUTTONS][NUM_COMMANDS_PER_BUTTON] = {
   0};
 char user_cmd_len[9] = {
   0};
+  boolean programModeFlag = false;
 
 // Local variables
 int RECV_PIN = IR_RECV_PIN;
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
 decode_results results;
+int user_cmd_index=0;
 
 /**
  * \fn void sndIRStream(unsigned char button)
@@ -39,11 +41,12 @@ void sndIRStream(unsigned char button)
 {
   unsigned long tmpValue;
   int tmpBits;
+  int protocol;
   if (user_cmd_len[button] > 0)
   {
-    int protocol = user_cmd[button][0].decode_type;
     for(int i=0;i<user_cmd_len[button];i++)
     {
+      protocol = user_cmd[button][i].decode_type;
       tmpValue = user_cmd[button][i].value;
       tmpBits = user_cmd[button][i].bits;
       switch(protocol){
@@ -69,39 +72,36 @@ void sndIRStream(unsigned char button)
         irsend.sendPanasonic(tmpValue, tmpBits); 
         break;   
       }
-      delay(40);
+      delay(200);
     }
   }
+}
+
+void enableIRReceive()
+{
+    irrecv.enableIRIn(); // Start the receiver
+    programModeFlag = true;
+    user_cmd_index = 0;
+    user_cmd_len[activeBtnNum] = 0;
+}
+
+void disableIRReceive()
+{
+    programModeFlag = false;
 }
 
 /**
  * \fn void rcvIRStream(unsigned char button)
  * \brief Receives the IR command and saves them to the user_cmd array
  */
-void rcvIRStream(unsigned char button)
+boolean rcvIRStream()
 {
-  unsigned char tmpCmd1, tmpCmd2;
-  irrecv.enableIRIn(); // Start the receiver
-  char user_cmd_index = 0;
-  user_cmd_len[button] = 0;
-
-  while(1)
-  {
-    if (Serial.available() > 1)
-    {
-      tmpCmd1 = Serial.read();
-      tmpCmd2 = Serial.read();
-      if (tmpCmd1 == 'F' && tmpCmd2 == '\n') 
-      {
-        serial_ack('F');
-        break;
-      }
-    }    
     if (irrecv.decode(&results))
     {
       if (results.bits)
       {
-        Serial.print("0x");
+        Serial.print(results.decode_type);        
+        Serial.print(", 0x");
         Serial.println(results.value, HEX);
         
         // Only extract useful information from decode_results data type
@@ -110,17 +110,16 @@ void rcvIRStream(unsigned char button)
         tmpCmd.value = (unsigned long)results.value;
         tmpCmd.bits = (unsigned char)results.bits;
 
-        user_cmd[button][user_cmd_index++] = tmpCmd;
-        user_cmd_len[button]++;
+        user_cmd[activeBtnNum][user_cmd_index++] = tmpCmd;
+        user_cmd_len[activeBtnNum]++;
       }
       irrecv.resume(); // Receive the next value
     }    
-    if (user_cmd_len[button] >= NUM_COMMANDS_PER_BUTTON) 
+    if (user_cmd_len[activeBtnNum] >= NUM_COMMANDS_PER_BUTTON) 
     {
-      serial_ack('B');
-      break;
+      return false;
     }
-  }
+    return true;
 }
 
 void serial_ack(char cmd)
@@ -135,6 +134,18 @@ void serial_error(char cmd)
   Serial.println(cmd);  
 }
 
+void printButtonInfo(unsigned char button)
+{
+  if (user_cmd_len[button] > 0)
+  {
+    for(int i=0;i<user_cmd_len[button];i++)
+    {
+      Serial.print(user_cmd[button][0].decode_type);
+      Serial.print(", 0x");
+      Serial.println(user_cmd[button][i].value, HEX);
+    }
+  }  
+}
 
 
 

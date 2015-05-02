@@ -23,6 +23,11 @@
 #include "button.h"
 #include "transceive.h"
 
+// Variables
+char cmdBuffer[128];
+unsigned char cmdIdx=0;
+unsigned char activeBtnNum=0;
+
 // Local functions
 void getAddr();
 void saveToEEPROM();
@@ -33,14 +38,16 @@ void readFromEEPROM();
  * \brief Set up buttons and USB and read from EEPROM
  */
 void setup(){
-  Serial.begin(9600);
-  Serial.print("Zemote\n");  
   for (int i=0; i<NUM_PHY_BUTTONS; i++)
   {
     pinMode(buttons[i], INPUT); // Input pins
     digitalWrite(buttons[i], HIGH); // Internal pull-up resistor
   }
+
   readFromEEPROM();
+
+  Serial.begin(9600);
+  Serial.print("Zemote\n");  
 }
 
 /**
@@ -48,59 +55,100 @@ void setup(){
  * \brief Main loop that handles button checking and USB communication
  */
 void loop()
-{   
-  char cmd1, cmd2, cmd3;  
-  if (Serial.available() > 2)
-  {
-    cmd1 = Serial.read();
-    cmd2 = Serial.read();
-    cmd3 = Serial.read();
-    if (cmd3 == '\n')
+{ 
+  while(Serial.available() > 0)
+  { 
+    cmdBuffer[cmdIdx] = Serial.read();
+    if(cmdBuffer[cmdIdx] == '\n')
     {
-#if DEBUG==1
-      Serial.print(cmd1);
-      Serial.print(cmd2);
-      Serial.print(cmd3);
-#endif
-      cmd2 -= 48;
-      if (cmd2 < 0 || cmd2 > NUM_SOFT_BUTTONS)
+      if(processCmd())
       {
-        serial_error(cmd1);
-        serial_error(cmd2+48);
-        return; 
+        serial_ack(cmdBuffer[0]); 
       }
-      switch(cmd1)
+      else
       {
-      case 'T':
-        sndIRStream(cmd2);
-        break;
-      case 'S':
-        saveToEEPROM();
-        break;
-      case 'R':
-        readFromEEPROM();
-        break;
-      case 'V':
-        Serial.println(VERSION_NUM);
-        break;
-      default:
-        break;
+        serial_error(cmdBuffer[0]);
       }
-      serial_ack(cmd1);
-      if (cmd1 == 'P') rcvIRStream(cmd2);
+      cmdIdx=0;      
     }
     else
     {
-      serial_error(cmd1);
-    }   
+      cmdIdx++;
+    }
+  }
+  if (programModeFlag)
+  {
+    if(!rcvIRStream())
+    {
+      serial_ack('F'); 
+      disableIRReceive();
+    }
   }
   check_buttons();
 }
 
+boolean processCmd()
+{
+  unsigned char retVal=0;
+  switch(cmdBuffer[0])
+  {
+  case 'T':
+    if (!checkInputButtonCmd())
+    {
+      return false;
+    }
+    Serial.println(activeBtnNum);
+    sndIRStream(activeBtnNum);  
+    break;
+  case 'S':
+    saveToEEPROM();
+    break;
+  case 'R':
+    readFromEEPROM();
+    break;
+  case 'V':
+    Serial.print("Firmware Version: ");
+    Serial.println(VERSION_NUM);
+    break;
+  case 'P':
+    if (!checkInputButtonCmd())
+    {
+      return false; 
+    }
+    enableIRReceive();
+    // Action while loop to be done in main loop
+    break;
+  case 'F':
+    disableIRReceive();
+    break;
+  case 'G':
+    if (!checkInputButtonCmd())
+    {
+      return false;
+    }
+    printButtonInfo(activeBtnNum);  
+    break;
+  default:
+    return false;
+    break;
+  }
+  return true;
+}
+
+boolean checkInputButtonCmd()
+{
+  activeBtnNum = cmdBuffer[1] - '0';
+  if (activeBtnNum  < 0 || activeBtnNum  > NUM_SOFT_BUTTONS)
+  {
+    return false; 
+  } 
+  return true;
+}
+
 /**
-* \fn int getAddr(int buttonLen, int cmdLen)
-* \brief Get address for EEPROM read and save
-*/
+ * \fn int getAddr(int buttonLen, int cmdLen)
+ * \brief Get address for EEPROM read and save
+ */
 int getAddr(int buttonLen, int cmdLen)
 {
   return (buttonLen * NUM_COMMANDS_PER_BUTTON + cmdLen) * NUM_BYTES_PER_COMMAND;
@@ -209,6 +257,14 @@ void readFromEEPROM()
 #endif
   }
 }
+
+
+
+
+
+
+
+
 
 
 

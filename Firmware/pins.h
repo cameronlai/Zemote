@@ -28,7 +28,7 @@
 #define CH_MINUS_PIN  5
 
 // IR receiver pin
-#define IR_RECV_PIN A0;
+#define IR_RECV_PIN A0
 
 // IR transmitter output uses Timer 2A, which is on pin 3
 // This is hard coded in the IR Remote library

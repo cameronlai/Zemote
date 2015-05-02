@@ -43,14 +43,17 @@ struct zemote_decode{
  */
 extern zemote_decode user_cmd[NUM_SOFT_BUTTONS][NUM_COMMANDS_PER_BUTTON];
 extern char user_cmd_len[9];
+extern boolean programModeFlag;
+extern unsigned char activeBtnNum;
 
 // Function prototype
-void rcvIRStream(unsigned char button);
 void sndIRStream(unsigned char button);
-void checkButton(unsigned char button);
-void eraseButton(unsigned char button);
+boolean rcvIRStream();
+void enableIRReceive();
+void disableIRReceive();
 void serial_ack(char cmd);
 void serial_error(char cmd);
+void printButtonInfo(unsigned char button);
 
 #endif
 
