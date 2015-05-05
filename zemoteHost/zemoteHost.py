@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Zemote
 # (C) Copyright 2014 Cameron Lai
 #
@@ -12,7 +13,8 @@
 # Lesser General Public License for more details.
 
 import wx
-from ZemoteCore import *
+
+from zemoteCore import *
 
 # gui
 from gui.myMenuBar import myMenuBar
@@ -20,14 +22,7 @@ from gui.serialTerminal import serialTerminal
 from gui.serialToolBar import serialToolBar
 from gui.mainPanel import mainPanel
 
-class zemote_gui():
-    def __init__(self):
-        APP = wx.App(False)
-        FRAME = _zemote_gui_frame(None)
-        FRAME.Show()
-        APP.MainLoop()
-
-class _zemote_gui_frame(wx.Frame):
+class zemoteGuiFrame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, title="Zemote", size=(600, 500))      
         self.SetMinSize((600, 500))
@@ -73,4 +68,11 @@ class _zemote_gui_frame(wx.Frame):
         self.core.continue_read_thread = False
         self.Destroy()
 
+if __name__ == '__main__':
+    print "hello"
+    APP = wx.App(False)
+    FRAME = zemoteGuiFrame(None)
+    FRAME.Show()
+    APP.MainLoop()
+    
 
