@@ -55,6 +55,7 @@ void disableIRReceive();
 void serial_ack(char cmd);
 void serial_error(char cmd);
 void printButtonInfo(unsigned char button);
+void printAllButtonLength();
 
 #endif
 

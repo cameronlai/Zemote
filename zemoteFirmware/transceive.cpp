@@ -197,7 +197,13 @@ void printDecodeTypeString(int decode_type)
   } 
 }
 
-
+void printAllButtonLength()
+{
+  for(int i=0;i<NUM_SOFT_BUTTONS;i++)
+  {
+    Serial.println((int)user_cmd_len[i]);
+  }  
+}
 
 
 

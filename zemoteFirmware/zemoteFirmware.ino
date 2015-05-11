@@ -120,6 +120,9 @@ boolean processCmd()
   case 'F':
     disableIRReceive();
     break;
+  case 'L':
+    printAllButtonLength();
+    break;
   case 'G':
     if (!checkInputButtonCmd())
     {
