@@ -20,32 +20,45 @@ class mainPanel(wx.Panel):
         self.parent = parent
         self.core = self.parent.core
         self.channelNum = 6
+
+        # Fixed strings
+        self.buttonNames = [
+            'Channel 6',
+            'Channel 5',
+            'Channel 4',
+            'Channel 3',
+            'Channel 2',
+            'Channel 1 (Home)',
+            'Volume down',
+            'Volume up',
+            'Power',
+            ]
        
         # Layout
         self.__DoLayout() 
 
     def __DoLayout(self):
         # Button list
-        self.buttonList = wx.ListCtrl(self, size=(200,250),
+        self.buttonList = wx.ListCtrl(self, size=(300,250),
                                       style=wx.LC_REPORT | wx.BORDER_SUNKEN)    
-        self.buttonList.InsertColumn(0,'Select buttons or channels', width=200)
-        for i in range(0, self.channelNum-1):           
-            self.buttonList.InsertStringItem(0, 'Channel ' + str(self.channelNum-i))
-        self.buttonList.InsertStringItem(0, 'Channel 1 (Home)')
-        self.buttonList.InsertStringItem(0, 'Volume down')
-        self.buttonList.InsertStringItem(0, 'Volume up')
-        self.buttonList.InsertStringItem(0, 'Power')
+        self.buttonList.InsertColumn(0,'Buttons or channels', width=150)
+        self.buttonList.InsertColumn(1,'No. of commands', width=150)
+        for i in range(len(self.buttonNames)):           
+            self.buttonList.InsertStringItem(0, self.buttonNames[i])
+            self.buttonList.SetStringItem(0, 1, '0')
         self.buttonList.Select(0)
 
         # Buttons in host software
         buttonPanel = wx.Panel(self)
         self.programButton = wx.Button(buttonPanel, name='Program', label='Program')
+        self.getAllInfoButton = wx.Button(buttonPanel, name='Get All', label='Get All')
         self.getInfoButton = wx.Button(buttonPanel, name='Get Info', label='Get Info')
         self.testButton = wx.Button(buttonPanel, -1, name='Test', label='Test')
         self.saveToEEPROMButton = wx.Button(buttonPanel, -1, name='Save', label='Save all')
         self.resetAllButton = wx.Button(buttonPanel, -1, name='Reset', label='Reset all')
 
         # Binding
+        self.getAllInfoButton.Bind(wx.EVT_BUTTON, self.OnGetAllInfo)
         self.getInfoButton.Bind(wx.EVT_BUTTON, self.OnGetInfo)
         self.testButton.Bind(wx.EVT_BUTTON, self.OnTest)        
         self.programButton.Bind(wx.EVT_BUTTON, self.OnProgram)        
@@ -54,8 +67,9 @@ class mainPanel(wx.Panel):
 
         # Button list sizer
         buttonSizer = wx.GridBagSizer(3,2)
-        buttonSizer.Add(self.programButton, pos=(1,0), span=(1, 2), flag=wx.EXPAND)
         buttonSizer.AddMany([
+            (self.programButton, (1,0)),
+            (self.getAllInfoButton, (1,1)),
             (self.testButton, (2,0)),
             (self.getInfoButton, (2,1)),
             (self.saveToEEPROMButton, (3,0)),
@@ -72,6 +86,11 @@ class mainPanel(wx.Panel):
                 (buttonPanel, 0, wx.ALIGN_CENTER),
         ])
         self.SetSizer(sizer)
+
+    def OnGetAllInfo(self, e):
+        if self.core.getAllButtonLength():
+            for i in range(len(self.buttonNames)):
+                self.buttonList.SetStringItem(i, 1, self.core.SerialBuffer[i].rstrip())
 
     def OnGetInfo(self, e):
         buttonListIndex = self.buttonList.GetFocusedItem()

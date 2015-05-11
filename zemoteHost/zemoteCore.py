@@ -34,6 +34,9 @@ class ZemoteCore():
 
         self.programMode = False
 
+        self.SerialBuffer = []
+        self.SerialBufferTargetLen = 0
+
         # Call back functions for UI
         self.display_msg_cb = None # Call back function for line read from serial port        
         self.display_connection_action_cb = None # Call back for connection action
@@ -113,7 +116,10 @@ class ZemoteCore():
         while self.continue_read_thread:
             try:
                 line = self.s.readline()
-                if line is not '':             
+                if line is not '':     
+                    if self.SerialBufferTargetLen > 0:
+                        self.SerialBuffer.append(line)
+                        self.SerialBufferTargetLen -= 1
                     wx.CallAfter(self.display_msg_cb, line)
                     if 'ok - F' in line: # end of program mode
                         self.programMode = False
@@ -154,6 +160,15 @@ class ZemoteCore():
             self.programMode = False
         return ret
             
+    def getAllButtonLength(self):
+        self.SerialBufferTargetLen = 9 # number of soft buttons
+        self.SerialBuffer = []
+        ret = self.send('L')
+        if ret:
+            while(self.SerialBufferTargetLen > 0):
+                pass
+        return ret
+
     def getButtonInfo(self, btnIndex):
         return self.send('G' + str(btnIndex))
 

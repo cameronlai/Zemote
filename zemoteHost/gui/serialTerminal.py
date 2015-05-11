@@ -63,8 +63,6 @@ class serialTerminal(wx.Panel):
         self.terminalTextCtrl.AppendText(line)
 
     def setCommand(self, direction):
-        print self.history
-        print self.historyIndex
         if (len(self.history) == 0):
             return
         elif (direction == -1 and self.historyIndex==0):

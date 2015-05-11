@@ -25,7 +25,7 @@ from gui.mainPanel import mainPanel
 class zemoteGuiFrame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, title="Zemote", size=(600, 500))      
-        self.SetMinSize((600, 500))
+        self.SetMinSize((700, 500))
         self.Bind(wx.EVT_CLOSE, self.OnQuit)
         
         # Initiate ZemoteCore
