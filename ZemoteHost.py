@@ -14,7 +14,7 @@
 
 import wx
 
-from zemoteCore import *
+from ZemoteCore import *
 
 # gui
 from gui.myMenuBar import myMenuBar
@@ -69,7 +69,6 @@ class zemoteGuiFrame(wx.Frame):
         self.Destroy()
 
 if __name__ == '__main__':
-    print "hello"
     APP = wx.App(False)
     FRAME = zemoteGuiFrame(None)
     FRAME.Show()

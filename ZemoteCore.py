@@ -23,7 +23,7 @@ class ZemoteCore():
         self.title = 'Zemote'
         self.s = None
         self.read_thread = None
-        self.debug = True
+        self.debug = False
         self.connected = False
         self.port = None
         self.baudrate = None
