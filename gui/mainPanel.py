@@ -50,13 +50,13 @@ class mainPanel(wx.Panel):
         self.buttonList.Select(0)
 
         # Buttons in host software
-        buttonPanel = wx.Panel(self)
-        self.programButton = wx.Button(buttonPanel, name='Program', label='Program')
-        self.getAllInfoButton = wx.Button(buttonPanel, name='Get All', label='Get All')
-        self.getInfoButton = wx.Button(buttonPanel, name='Get Info', label='Get Info')
-        self.testButton = wx.Button(buttonPanel, -1, name='Test', label='Test')
-        self.saveToEEPROMButton = wx.Button(buttonPanel, -1, name='Save', label='Save all')
-        self.resetAllButton = wx.Button(buttonPanel, -1, name='Reset', label='Reset all')
+        self.buttonPanel = wx.Panel(self)
+        self.programButton = self.MakeButton('Program')
+        self.getAllInfoButton = self.MakeButton('Get All Lengths')
+        self.getInfoButton = self.MakeButton('Get Commands')
+        self.testButton = self.MakeButton('Test Button')
+        self.saveToEEPROMButton = self.MakeButton('Save All')
+        self.resetAllButton = self.MakeButton('Reset All')
 
         # Binding
         self.getAllInfoButton.Bind(wx.EVT_BUTTON, self.OnGetAllInfo)
@@ -76,7 +76,7 @@ class mainPanel(wx.Panel):
             (self.saveToEEPROMButton, (3,0)),
             (self.resetAllButton, (3,1)),
         ])
-        buttonPanel.SetSizer(buttonSizer)
+        self.buttonPanel.SetSizer(buttonSizer)
 
         # Sizer
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -84,9 +84,12 @@ class mainPanel(wx.Panel):
                 ((15,15), 0),
                 (self.buttonList, 0, wx.ALIGN_CENTER),
                 ((15,15), 0),
-                (buttonPanel, 0, wx.ALIGN_CENTER),
+                (self.buttonPanel, 0, wx.ALIGN_CENTER),
         ])
         self.SetSizer(sizer)
+
+    def MakeButton(self, inputLabel):
+        return wx.Button(self.buttonPanel, name=inputLabel, label=inputLabel, size=(150,30))
 
     def OnGetAllInfo(self, e):
         if self.core.getAllButtonLength():
