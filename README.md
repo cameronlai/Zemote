@@ -1,6 +1,8 @@
 # ZemoteHost
 Host Software for Zemote Programmable Remote Control
 
+To run the program, execute ZemoteHost.py
+
 # About Zemote
 Zemote is a programmable IR remote control. 
 You can configure Zemote into any kind of remote control.
