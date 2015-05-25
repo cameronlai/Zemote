@@ -50,6 +50,7 @@ class serialToolBar(wx.Panel):
         self.SetSizer(sizer)        
     
     def OnRefresh(self, e):
+        self.serialPortsComboBox.Clear()
         self.serialPorts = self.core.scanSerialPort()
         if len(self.serialPorts) > 0:
             for i in range(len(self.serialPorts)):
