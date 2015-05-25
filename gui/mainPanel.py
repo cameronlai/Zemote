@@ -96,6 +96,10 @@ class mainPanel(wx.Panel):
             for i in range(len(self.buttonNames)):
                 self.buttonList.SetStringItem(i, 1, self.core.SerialBuffer[i].rstrip())
 
+    def UpdateAllCmdLength(self):
+        for i in range(len(self.buttonNames)):
+            self.buttonList.SetStringItem(i, 1, self.core.SerialBuffer[i].rstrip())
+
     def OnGetInfo(self, e):
         buttonListIndex = self.buttonList.GetFocusedItem()
         self.core.getButtonInfo(buttonListIndex)

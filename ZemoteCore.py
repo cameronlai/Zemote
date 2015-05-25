@@ -43,6 +43,7 @@ class ZemoteCore():
         self.display_connection_action_cb = None # Call back for connection action
         self.display_status_cb = None # Call back for status bar update
         self.display_program_mode_cb = None # Call back for program button
+        self.display_all_cmd_length_cb = None # Call back to update UI command lengths
 
     def connect(self, port = None, baudrate = None):
         if port is not None:
@@ -53,14 +54,19 @@ class ZemoteCore():
             try:                
                 self.s = serial.Serial(self.port, self.baudrate, timeout=1)
                 self.connected = True
+
+                # UI
+                wx.CallAfter(self.display_connection_action_cb, 'Disconnect')
+                wx.CallAfter(self.display_status_cb, self.title + ' is connected!')
                 # Read thread
                 self.continue_read_thread = True        
                 self.read_thread = threading.Thread(target = self._listen)
                 self.read_thread.start()
-                time.sleep(1)
-                # UI
-                wx.CallAfter(self.display_connection_action_cb, 'Disconnect')
-                wx.CallAfter(self.display_status_cb, self.title + ' is connected!')
+                time.sleep(2)
+
+                # Check all command lengths for UI display
+                self.getAllButtonLength()
+
                 if self.debug:
                     print('Serial device is connected!')                
                 return True
@@ -147,6 +153,9 @@ class ZemoteCore():
     def setDisplayProgramModeCallBack(self, function):
         self.display_program_mode_cb = function
 
+    def setDisplayAllCmdLengthCallBack(self, function):
+        self.display_all_cmd_length_cb = function
+
     # All functions below are based on pre-defined protocols
 
     def startProgramMode(self, btnIndex):
@@ -168,6 +177,7 @@ class ZemoteCore():
         if ret:
             while(self.SerialBufferTargetLen > 0):
                 pass
+            wx.CallAfter(self.display_all_cmd_length_cb)
         return ret
 
     def getButtonInfo(self, btnIndex):
