@@ -50,7 +50,8 @@ class zemoteGuiFrame(wx.Frame):
         self.core.setDisplayStatusCallBack(self.statusBar.SetStatusText)        
         self.core.setDisplayProgramModeCallBack(self.mainPanel.programButton.SetLabel)
         self.core.setDisplayCmdLengthCallBack(self.mainPanel.UpdateCmdLength)
-        
+        self.core.setDisplayModeCallBack(self.mainPanel.UpdateModeText)
+
         # Layout
         botSizer = wx.BoxSizer(wx.HORIZONTAL)
         botSizer.AddMany([

@@ -23,31 +23,45 @@ class mainPanel(wx.Panel):
         self.channelNum = 6
 
         # Fixed strings
-        self.buttonNames = [
-            'Channel 6',
-            'Channel 5',
-            'Channel 4',
-            'Channel 3',
-            'Channel 2',
-            'Channel 1 (Home)',
-            'Volume down',
-            'Volume up',
+        self.TVModeButtonNames = [
             'Power',
+            'Volume +',
+            'Volume -',
+            'Channel 1 (Home)',
+            'Channel 2',
+            'Channel 3',
+            'Channel 4',
+            'Channel 5',
+            'Channel 6',
             ]
-       
+        self.SimpleModeButtonNames = [
+            'Power',
+            'Volume +',
+            'Volume -',
+            'Home',
+            'Channel +',
+            'Channel -',
+            ]
+        self.modeButtonNumDiff = len(self.TVModeButtonNames) - len(self.SimpleModeButtonNames)    
+
         # Layout
         self.__DoLayout() 
+
+    def LayoutButtonList(self, buttonNames):
+        self.buttonList.ClearAll()
+        self.buttonList.InsertColumn(0,'Buttons or channels', width=150)
+        self.buttonList.InsertColumn(1,'No. of commands', width=150)
+        for i in reversed(range(len(buttonNames))):
+            self.buttonList.InsertStringItem(0, buttonNames[i])
+            self.buttonList.SetStringItem(0, 1, self.core.buttonLengthList[i])
+        self.buttonList.Select(0) 
 
     def __DoLayout(self):
         # Button list
         self.buttonList = wx.ListCtrl(self, size=(300,250),
-                                      style=wx.LC_REPORT | wx.BORDER_SUNKEN)    
-        self.buttonList.InsertColumn(0,'Buttons or channels', width=150)
-        self.buttonList.InsertColumn(1,'No. of commands', width=150)
-        for i in range(len(self.buttonNames)):           
-            self.buttonList.InsertStringItem(0, self.buttonNames[i])
-            self.buttonList.SetStringItem(0, 1, '0')
-        self.buttonList.Select(0)
+                                      style=wx.LC_REPORT | wx.BORDER_SUNKEN)
+        # Default to TV Mode
+        self.LayoutButtonList(self.TVModeButtonNames)
 
         # Buttons in host software
         self.buttonPanel = wx.Panel(self)
@@ -56,6 +70,11 @@ class mainPanel(wx.Panel):
         self.testButton = self.MakeButton('Test Button')
         self.saveToEEPROMButton = self.MakeButton('Save All')
         self.resetAllButton = self.MakeButton('Reset All')
+        self.switchModeButton = self.MakeButton('Switch mode')
+
+        # Static text
+        self.modeText = wx.TextCtrl(self.buttonPanel, -1, 'Mode: TV', 
+                                    size=(125,-1), style=wx.TE_READONLY)
 
         # Binding
         self.getInfoButton.Bind(wx.EVT_BUTTON, self.OnGetInfo)
@@ -63,15 +82,18 @@ class mainPanel(wx.Panel):
         self.programButton.Bind(wx.EVT_BUTTON, self.OnProgram)        
         self.saveToEEPROMButton.Bind(wx.EVT_BUTTON, self.OnSave)        
         self.resetAllButton.Bind(wx.EVT_BUTTON, self.OnResetAll)
+        self.switchModeButton.Bind(wx.EVT_BUTTON, self.OnSwitchMode)
 
         # Button list sizer
-        buttonSizer = wx.GridBagSizer(2,2)
+        buttonSizer = wx.GridBagSizer(hgap=15, vgap=3)
         buttonSizer.AddMany([
-                (self.programButton, (1, 0)),
-                (self.testButton, (2,0)),
-                (self.getInfoButton, (2,1)),
-                (self.saveToEEPROMButton, (3,0)),
-                (self.resetAllButton, (3,1)),
+                (self.programButton, (0,0)),
+                (self.testButton, (1,0)),
+                (self.getInfoButton, (1,1)),
+                (self.saveToEEPROMButton, (2,0)),
+                (self.resetAllButton, (2,1)),
+                (self.switchModeButton, (3,0)),
+                (self.modeText, (3,1)),
                 ])
         self.buttonPanel.SetSizer(buttonSizer)
 
@@ -113,3 +135,14 @@ class mainPanel(wx.Panel):
 
     def OnResetAll(self, e):
         self.core.resetAllToEEPROM()
+
+    def OnSwitchMode(self, e):
+        self.core.switchMode()
+    
+    def UpdateModeText(self):
+        if self.core.simpleModeEnabled:
+            self.modeText.SetValue('Mode: Simple')
+            self.LayoutButtonList(self.SimpleModeButtonNames)
+        else:
+            self.modeText.SetValue('Mode: TV')
+            self.LayoutButtonList(self.TVModeButtonNames)

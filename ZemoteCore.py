@@ -40,6 +40,8 @@ class ZemoteCore():
 
         self.numSoftButtons = 9 # includes all buttons and channels
         self.activtButtonIndex = -1 # -1 means invalid
+        self.simpleModeEnabled = False
+        self.buttonLengthList = ['0'] * self.numSoftButtons
 
         # Call back functions for UI
         self.display_msg_cb = None # Call back function for line read from serial port        
@@ -47,6 +49,7 @@ class ZemoteCore():
         self.display_status_cb = None # Call back for status bar update
         self.display_program_mode_cb = None # Call back for program button
         self.display_cmd_length_cb = None # Call back to update UI command lengths
+        self.display_mode_cb = None # Call back to display mode text
 
     def connect(self, port = None, baudrate = None):
         if port is not None:
@@ -67,8 +70,10 @@ class ZemoteCore():
                 self.read_thread.start()
                 time.sleep(2)
 
-                # Check all command lengths for UI display
+                # Initialization routine
                 self.getAllButtonLength()
+                time.sleep(1)
+                self.getMode()
 
                 if self.debug:
                     print('Serial device is connected!')                
@@ -136,9 +141,9 @@ class ZemoteCore():
                         wx.CallAfter(self.display_program_mode_cb, 'Program')
 
                         tmpLen = line[6]
+                        self.buttonLengthList[self.activeBtnIdx] = tmpLen
                         wx.CallAfter(self.display_cmd_length_cb, self.activeBtnIdx, tmpLen)
                         self.activeBtnIdx = -1 # Reset to invalid value
-
                     if self.debug:
                         print 'RCV:' + line
             except:                
@@ -164,6 +169,9 @@ class ZemoteCore():
     def setDisplayCmdLengthCallBack(self, function):
         self.display_cmd_length_cb = function
 
+    def setDisplayModeCallBack(self, function):
+        self.display_mode_cb = function
+
     # All functions below are based on pre-defined protocols
 
     def startProgramMode(self, btnIndex):
@@ -180,14 +188,16 @@ class ZemoteCore():
         return ret
             
     def getAllButtonLength(self):
-        self.SerialBufferTargetLen = self.numSoftButtons # number of soft buttons
+        self.SerialBufferTargetLen = self.numSoftButtons
         self.SerialBuffer = []
         ret = self.send('L')
         if ret:
             while(self.SerialBufferTargetLen > 0):
                 pass
             for i in range(self.numSoftButtons):
-                wx.CallAfter(self.display_cmd_length_cb, i, self.SerialBuffer[i].rstrip())
+                tmpLen = self.SerialBuffer[i].rstrip()
+                self.buttonLengthList[i] = tmpLen
+                wx.CallAfter(self.display_cmd_length_cb, i, tmpLen)
         return ret
 
     def getButtonInfo(self, btnIndex):
@@ -202,5 +212,28 @@ class ZemoteCore():
     def resetAllToEEPROM(self):
         return self.send('R')
 
+    def getMode(self):
+        self.SerialBufferTargetLen = 1
+        self.SerialBuffer = []
+        ret = self.send('M')
+        if ret:
+            while(self.SerialBufferTargetLen > 0):
+                pass
+            if 'Simple' in self.SerialBuffer[0]:
+                self.simpleModeEnabled = True
+            else:
+                self.simpleModeEnabled = False
+            wx.CallAfter(self.display_mode_cb)
+        return ret          
 
+    def switchMode(self):
+        if self.simpleModeEnabled:
+            cmd = 'X0'
+        else:
+            cmd = 'X1'
+        ret = self.send(cmd)
+        if ret:
+            self.simpleModeEnabled = not self.simpleModeEnabled
+            wx.CallAfter(self.display_mode_cb)
+        return ret
 
