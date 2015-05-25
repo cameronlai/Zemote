@@ -52,14 +52,12 @@ class mainPanel(wx.Panel):
         # Buttons in host software
         self.buttonPanel = wx.Panel(self)
         self.programButton = self.MakeButton('Program')
-        self.getAllInfoButton = self.MakeButton('Get All Lengths')
         self.getInfoButton = self.MakeButton('Get Commands')
         self.testButton = self.MakeButton('Test Button')
         self.saveToEEPROMButton = self.MakeButton('Save All')
         self.resetAllButton = self.MakeButton('Reset All')
 
         # Binding
-        self.getAllInfoButton.Bind(wx.EVT_BUTTON, self.OnGetAllInfo)
         self.getInfoButton.Bind(wx.EVT_BUTTON, self.OnGetInfo)
         self.testButton.Bind(wx.EVT_BUTTON, self.OnTest)        
         self.programButton.Bind(wx.EVT_BUTTON, self.OnProgram)        
@@ -67,15 +65,14 @@ class mainPanel(wx.Panel):
         self.resetAllButton.Bind(wx.EVT_BUTTON, self.OnResetAll)
 
         # Button list sizer
-        buttonSizer = wx.GridBagSizer(3,2)
+        buttonSizer = wx.GridBagSizer(2,2)
         buttonSizer.AddMany([
-            (self.programButton, (1,0)),
-            (self.getAllInfoButton, (1,1)),
-            (self.testButton, (2,0)),
-            (self.getInfoButton, (2,1)),
-            (self.saveToEEPROMButton, (3,0)),
-            (self.resetAllButton, (3,1)),
-        ])
+                (self.programButton, (1, 0)),
+                (self.testButton, (2,0)),
+                (self.getInfoButton, (2,1)),
+                (self.saveToEEPROMButton, (3,0)),
+                (self.resetAllButton, (3,1)),
+                ])
         self.buttonPanel.SetSizer(buttonSizer)
 
         # Sizer
@@ -91,14 +88,8 @@ class mainPanel(wx.Panel):
     def MakeButton(self, inputLabel):
         return wx.Button(self.buttonPanel, name=inputLabel, label=inputLabel, size=(150,30))
 
-    def OnGetAllInfo(self, e):
-        if self.core.getAllButtonLength():
-            for i in range(len(self.buttonNames)):
-                self.buttonList.SetStringItem(i, 1, self.core.SerialBuffer[i].rstrip())
-
-    def UpdateAllCmdLength(self):
-        for i in range(len(self.buttonNames)):
-            self.buttonList.SetStringItem(i, 1, self.core.SerialBuffer[i].rstrip())
+    def UpdateCmdLength(self, btnIdx, value):
+        self.buttonList.SetStringItem(btnIdx, 1, value)
 
     def OnGetInfo(self, e):
         buttonListIndex = self.buttonList.GetFocusedItem()
