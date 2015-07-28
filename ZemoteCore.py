@@ -19,9 +19,11 @@ import threading
 import time
 import wx
 
+__version__ = '2015.07.28'
+
 class ZemoteCore():
     def __init__(self):
-        self.title = 'Zemote'
+        self.title = 'Zemote Host'
         self.s = None
         self.read_thread = None
         self.debug = False

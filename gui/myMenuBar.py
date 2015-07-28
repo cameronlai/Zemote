@@ -16,8 +16,9 @@
 import wx
 
 class myMenuBar(wx.MenuBar):
-    def __init__(self, parent):
+    def __init__(self, parent, version):
         self.parent = parent
+        self.version = version
         self.menubar = wx.MenuBar()
         fileMenu = wx.Menu()
         helpMenu = wx.Menu()
@@ -52,11 +53,11 @@ Lesser General Public License for more details.
         info = wx.AboutDialogInfo()
 
         #info.SetIcon(wx.Icon('zemote.png', wx.BITMAP_TYPE_PNG))
-        info.SetName('Zemote')
-        info.SetVersion('1.0')
+        info.SetName('Zemote Host')
+        info.SetVersion(self.version)
         info.SetDescription(description)
         info.SetCopyright('(C) 2014 - 2015 Cameron Lai')
-        info.SetWebSite('https://github.com/cameronlai/zemote')
+        info.SetWebSite('https://github.com/cameronlai/ZemoteHost')
         info.SetLicence(licence)
         info.AddDeveloper('Cameron Lai')
         #info.AddDocWriter('')

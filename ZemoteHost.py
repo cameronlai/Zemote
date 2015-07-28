@@ -17,6 +17,7 @@
 
 import wx
 from ZemoteCore import *
+from ZemoteCore import __version__ as zemote_version
 from gui.myMenuBar import myMenuBar
 from gui.serialTerminal import serialTerminal
 from gui.serialToolBar import serialToolBar
@@ -32,7 +33,7 @@ class zemoteGuiFrame(wx.Frame):
         self.core = ZemoteCore()
 
         # Menu bar
-        self.menubar = myMenuBar(self)  
+        self.menubar = myMenuBar(self, zemote_version)  
         self.SetMenuBar(self.menubar.menubar)
  
         # Status bar
